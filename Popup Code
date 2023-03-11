@@ -1,0 +1,415 @@
+!-- THIS DENOTES A COMMENT WITHIN THE CODE-->
+<popup v-model="dialog" width="1500">
+ <!-- TOOLBAR NAME-->
+<template #title>
+{{ feature.name }} 
+</template>
+
+<template #content>
+
+  <v-card-text v-if="feature" class="mb-10">
+ 
+  <br />    <!-- SKIPS SPACE DOWN-->
+  <h2 class="Kelmur House">Imagery</h2>     <!-- IMAGERY TEXT -->
+    <!-- FIRST HEADER IMAGE -->
+    <v-flex class="pa-5 text-center">
+    <v-img
+      v-if="feature.attachments.filter(item => item.name === 'September2022.JPG').length > 0"
+      :src="`${feature.attachments.filter(item => item.name === 'September2022.JPG')[0].url}?download`"
+      max-width="2000"
+      max-height="450"
+    />
+    </v-flex>
+    <v-row class="subheading">
+    <v-col cols="0">
+        <address v-if="feature.label === 'Kelmur'">
+        Source: Google Images, Owner: Google, Capture Date: September 2022<br />    <!-- METADATA FOR HEADER IMAGE -->
+        </address>
+        </v-col>
+    </v-row>
+    <!-- SECOND HEADER IMAGE -->
+    <v-flex class="pa-5 text-center">
+    <v-img
+      v-if="feature.attachments.filter(item => item.name === 'December2018.JPG').length > 0"
+      :src="`${feature.attachments.filter(item => item.name === 'December2018.JPG')[0].url}?download`"
+      max-width="2000"
+      max-height="150"
+    />
+    </v-flex>
+    <v-row class="subheading">
+    <v-col cols="0">
+        <address v-if="feature.label === 'Kelmur'">
+        Source: Building Survey, Owner: Murphy Geospatial, Capture Date: December 2018<br />   <!-- METADATA FOR HEADER IMAGE -->
+        <br />
+        </address>
+        </v-col>
+    <!-- MATTERPORT VIEWER -->
+    </v-row>
+    <external-link-viewer v-if="feature.label === 'Kelmur'" url="https://my.matterport.com/show/?m=o3tf8oJcbLJ&play=1" />
+        <v-row class="subheading">
+    <v-col cols="0">
+        <address v-if="feature.label === 'Kelmur'">
+        Source: Matterport, Owner: Jeremiah Biala, Capture Date: December 2021<br />    <!-- MATTERPORT METADATA -->
+        </address>
+        </v-col>
+    </v-row>
+    <!-- GENERAL  -->
+    <v-divider />
+    <br />
+
+    <h2 class="Kelmur House">Details</h2> <!-- DETAILS TEXT -->
+
+    <v-container>    <!-- BUILDING ADDRESS AND DIRECTIONAL BUTTONS -->
+      <v-row class="subheading">
+        <v-col cols="10">
+        <address v-if="feature.label === 'Kelmur'">
+          Apartment 1 <br />
+          Kelmur House <br />
+          Main Street <br />
+          Blessington <br />
+          Co. Wicklow <br />
+          W91 DY6T <br />
+          MPRN: 10308371771<br />
+          <br />
+          Apartment 2<br />
+          Kelmur House <br />
+          Main Street <br />
+          Blessington <br />
+          Co. Wicklow <br />
+          W91 W5PX <br />
+          MPRN: 10308371783<br />
+          <br />
+          Planning ID: 191095 <br />
+          Grant Managers Order Number: 435/2020 <br />
+          Property Number: 627137 <br />
+          <br />
+          Owner Telephone: +353 87 255 8861  <br />
+          Owner Email: nmurphy@murphygs.ie <br />
+          
+        </address>
+          
+        </v-col>
+      </v-row>
+      
+      <v-row class="subheading">
+        <v-col cols="2">Google Maps</v-col>
+        <v-col cols="10">
+          <v-btn
+            :href="`https://www.google.com/maps/search/?api=1&query=${feature.wgs84_lat},${feature.wgs84_lon}`"
+            target="_blank"
+            class="mx-0 mt-0"
+            outlined
+            small
+          >
+            <v-icon small>fal fa-map-marker-alt</v-icon>&nbsp;Location
+          </v-btn>
+
+          <v-btn
+            :href="`https://www.google.com/maps/dir/?api=1&destination=${feature.wgs84_lat},${feature.wgs84_lon}`"
+            target="_blank"
+            class="mx-0 mt-0"
+            outlined
+            small
+          >
+            <v-icon small>fal fa-directions</v-icon>&nbsp;Directions
+          </v-btn>
+          
+        </v-col>
+      </v-row>
+    </v-container>
+
+    <v-divider class="my-3" />    <!-- CREATES A SEPARATING DIVIDING LINE -->
+    <h2 class="title mb-2"> Attachments </h2>     <!-- TITLE FOR ATTACHMENTS -->
+    <popup-tabs :tabs="['ACQUISITION', 'PLANNING', 'CONSTRUCTION','SALES/DISPOSALS','MANAGEMENT/IN-USE','PLANT & EQUIPMENT']" vertical>
+
+    <v-tab-item>
+    <popup-tabs :tabs="['LEGALS', 'FEASIBILITY STUDIES/DESIGN']">
+    <v-tab-item>
+    <!-- Legal Content -->
+    Legal Content
+    </v-tab-item>
+    <v-tab-item>
+    <!-- Feasibility Studies/Design Content -->
+     <v-list dense v-if="feature.attachments.filter(
+                    file => (
+                      file.name.toLowerCase().startsWith('br')
+                     )
+                   ).length > 0">
+          <v-list-item v-for="(file, index) in feature.attachments.filter(
+                    file => (
+                      file.name.toLowerCase().startsWith('br')
+                     )
+                   )" :key="index">
+            <v-list-item-content>
+              <nobr>
+                {{ file.name }}
+                <small class="text--secondary"> {{ formatFilesize(file.size) }}</small>
+
+                <small v-if="file.exif_datetime" class="text--secondary">
+                  {{ formatDate(file.exif_datetime) }}
+                </small>
+                <small v-else-if="file.last_modified">
+                  {{ formatDate(file.last_modified) }}
+                </small>
+              </nobr>
+            </v-list-item-content>
+            <v-list-item-action v-if="file.name.toLowerCase().endsWith('.jpg')">
+              <photo-viewer
+                width="40px" height="40px"
+                :photo="file"
+                :photos="feature.attachments.filter(
+                    file => (
+                      file.name.toLowerCase().startsWith('br')&& 
+                      !file.name !== 'header.jpg' &&
+                      file.name.toLowerCase().includes('dtm') &&
+                      file.name.toLowerCase().endsWith('.jpg')
+                     )
+                   )"
+              />
+            </v-list-item-action>
+
+            <v-list-item-action>
+              <v-btn
+                v-if="file.name.toLowerCase().endsWith('.jpg') || file.name.toLowerCase().endsWith('.jpeg') || file.name.toLowerCase().endsWith('.pdf') || file.name.toLowerCase().endsWith('.png') || file.name.toLowerCase().endsWith('.txt')"
+                :href="`${file.url}?download`"
+                color="primary"
+                target="_blank"
+                icon
+                small
+              >
+                <v-icon small>fal fa-external-link-alt</v-icon>
+              </v-btn>
+            </v-list-item-action>
+            
+            <v-list-item-action>
+              <v-btn
+                :href="`${file.url}?download&token=${token}`"
+                icon
+                width="30px" height="50px"
+              >
+                <v-icon>fal fa-download</v-icon>
+              </v-btn>
+            </v-list-item-action>
+          </v-list-item>
+        </v-list>
+        <span v-else > No files to display </span>
+    </v-tab-item>
+    </popup-tabs>
+    </v-tab-item>
+
+    <v-tab-item>
+    <popup-tabs :tabs="['PLANNING REFERENCE', 'FINAL GRANT', 'COMMMENCEMENT NOTICE','DEVELOPMENT FEES','BCAR CERTIFICATION','FIRE CERT','DETAILED DESIGN DRAWINGS']">
+    <v-tab-item>
+    Planning Reference Content
+    </v-tab-item>
+    <v-tab-item>
+    Final Grant Content
+    </v-tab-item>
+    <v-tab-item>
+    Commencement Notice Content
+    </v-tab-item>
+    <v-tab-item>
+    Development Fees Content
+    </v-tab-item>
+    <v-tab-item>
+    BCAR Certification Content 
+    </v-tab-item>
+    <v-tab-item>
+    Fire Cert Content
+    </v-tab-item>
+    <v-tab-item>
+    <!-- Detailed Design Drawings Content -->
+     <v-list dense v-if="feature.attachments.filter(
+                    file => (
+                      file.name.toLowerCase().startsWith('dd')
+                     )
+                   ).length > 0">
+          <v-list-item v-for="(file, index) in feature.attachments.filter(
+                    file => (
+                      file.name.toLowerCase().startsWith('dd')
+                     )
+                   )" :key="index">
+            <v-list-item-content>
+              <nobr>
+                {{ file.name }}
+                <small class="text--secondary"> {{ formatFilesize(file.size) }}</small>
+
+                <small v-if="file.exif_datetime" class="text--secondary">
+                  {{ formatDate(file.exif_datetime) }}
+                </small>
+                <small v-else-if="file.last_modified">
+                  {{ formatDate(file.last_modified) }}
+                </small>
+              </nobr>
+            </v-list-item-content>
+            <v-list-item-action v-if="file.name.toLowerCase().endsWith('.jpg')">
+              <photo-viewer
+                width="40px" height="40px"
+                :photo="file"
+                :photos="feature.attachments.filter(
+                    file => (
+                      file.name.toLowerCase().startsWith('dd')&& 
+                      !file.name !== 'header.jpg' &&
+                      file.name.toLowerCase().includes('dtm') &&
+                      file.name.toLowerCase().endsWith('.jpg')
+                     )
+                   )"
+              />
+            </v-list-item-action>
+
+            <v-list-item-action>
+              <v-btn
+                v-if="file.name.toLowerCase().endsWith('.jpg') || file.name.toLowerCase().endsWith('.jpeg') || file.name.toLowerCase().endsWith('.pdf') || file.name.toLowerCase().endsWith('.dwg') || file.name.toLowerCase().endsWith('.txt')"
+                :href="`${file.url}?download`"
+                color="primary"
+                target="_blank"
+                icon
+                small
+              >
+                <v-icon small>fal fa-external-link-alt</v-icon>
+              </v-btn>
+            </v-list-item-action>
+            
+            <v-list-item-action>
+              <v-btn
+                :href="`${file.url}?download&token=${token}`"
+                icon
+                width="30px" height="50px"
+              >
+                <v-icon>fal fa-download</v-icon>
+              </v-btn>
+            </v-list-item-action>
+          </v-list-item>
+        </v-list>
+        <span v-else > No files to display </span>
+    </v-tab-item>
+    </popup-tabs>
+    </v-tab-item>
+
+    <v-tab-item>
+    <popup-tabs :tabs="['AS-BUILT DRAWINGS', 'DEVIATIONS']">
+    <v-tab-item>
+    <external-link-viewer v-if="feature.label === 'Kelmur'" url="https://panoramas.murphysurveys.co.uk/data_general/demo_blessington/" />
+    </v-tab-item>
+    <v-tab-item>
+    Deviations Content
+    </v-tab-item>
+    </popup-tabs>
+    </v-tab-item>
+    
+    <v-tab-item>
+    <popup-tabs :tabs="['CONTRACT MAPS', 'OMC/TIC MAPS', 'ESTATE MAP','PRA SCHEME MAP','COMMON AREA TRANSFER MAPS']">
+    <v-tab-item>
+    Contract Maps Content
+    </v-tab-item>
+    <v-tab-item>
+    OMC/TIC Maps Content
+    </v-tab-item>
+    <v-tab-item>
+    Estate Map Content
+    </v-tab-item>
+    <v-tab-item>
+    PRA Scheme Content
+    </v-tab-item>
+    <v-tab-item>
+    Common Area Transfer Maps Content 
+    </v-tab-item>
+    </popup-tabs>
+    </v-tab-item>
+    
+    <v-tab-item>
+    <popup-tabs :tabs="['UTILITIES', 'INSURANCES', 'LOCAL AUTHORITY','SERVICE AGREEMENTS', 'LEGALS']">
+    <v-tab-item>
+    Utilities Content
+    </v-tab-item>
+    <v-tab-item>
+    <!--Insurances Content-->
+     <v-list dense v-if="feature.attachments.filter(
+                    file => (
+                      file.name.toLowerCase().startsWith('in')
+                     )
+                   ).length > 0">
+          <v-list-item v-for="(file, index) in feature.attachments.filter(
+                    file => (
+                      file.name.toLowerCase().startsWith('in')
+                     )
+                   )" :key="index">
+            <v-list-item-content>
+              <nobr>
+                {{ file.name }}
+                <small class="text--secondary"> {{ formatFilesize(file.size) }}</small>
+
+                <small v-if="file.exif_datetime" class="text--secondary">
+                  {{ formatDate(file.exif_datetime) }}
+                </small>
+                <small v-else-if="file.last_modified">
+                  {{ formatDate(file.last_modified) }}
+                </small>
+              </nobr>
+            </v-list-item-content>
+            <v-list-item-action v-if="file.name.toLowerCase().endsWith('.jpg')">
+              <photo-viewer
+                width="40px" height="40px"
+                :photo="file"
+                :photos="feature.attachments.filter(
+                    file => (
+                      file.name.toLowerCase().startsWith('in')&& 
+                      !file.name !== 'header.jpg' &&
+                      file.name.toLowerCase().includes('dtm') &&
+                      file.name.toLowerCase().endsWith('.jpg')
+                     )
+                   )"
+              />
+            </v-list-item-action>
+
+            <v-list-item-action>
+              <v-btn
+                v-if="file.name.toLowerCase().endsWith('.jpg') || file.name.toLowerCase().endsWith('.jpeg') || file.name.toLowerCase().endsWith('.pdf') || file.name.toLowerCase().endsWith('.dwg') || file.name.toLowerCase().endsWith('.txt')"
+                :href="`${file.url}?download`"
+                color="primary"
+                target="_blank"
+                icon
+                small
+              >
+                <v-icon small>fal fa-external-link-alt</v-icon>
+              </v-btn>
+            </v-list-item-action>
+            
+            <v-list-item-action>
+              <v-btn
+                :href="`${file.url}?download&token=${token}`"
+                icon
+                width="30px" height="50px"
+              >
+                <v-icon>fal fa-download</v-icon>
+              </v-btn>
+            </v-list-item-action>
+          </v-list-item>
+        </v-list>
+        <span v-else > No files to display </span>
+    </v-tab-item>
+    <v-tab-item>
+    Local Authority Content
+    </v-tab-item>
+    <v-tab-item>
+    Service Agreements
+    </v-tab-item>
+    <v-tab-item>
+    Legals Content
+    </v-tab-item>
+    </popup-tabs>
+    </v-tab-item>
+    
+    <v-tab-item>
+    <popup-tabs :tabs="['LIST OF PLANT']">
+    <v-tab-item>
+    List of Plant Content
+    </v-tab-item>
+    </popup-tabs>
+    </v-tab-item>
+    
+</v-card-text>
+<h2 class="title mb-2"> Work in Progress. Last Updated: 24/02/23 </h2> 
+</template>
+
+</popup>
